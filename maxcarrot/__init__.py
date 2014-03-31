@@ -20,6 +20,9 @@ class RabbitWrapper(object):
 
         return rabbitpy.Exchange(self.channel, '{}.subscribe'.format(username), exchange_type='fanout')
 
+    def disconnect(self):
+        self.connection.close()
+
 
 class RabbitServer(RabbitWrapper):
     """
