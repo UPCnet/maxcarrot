@@ -230,3 +230,50 @@ class FunctionalTests(RabbitTests):
 
         self.assertEqual(len(messages_to_sheldon), 1)
         self.assertEqual(len(messages_to_leonard), 1)
+
+    def test_basic_receive_multiple_context_activity(self):
+        """
+        Given three users in contexts
+        When a message is posted to the contexts
+        Then each of them receives only the messages from that context
+        """
+        self.server.create_users(['sheldon', 'leonard', 'penny'])
+        self.server.activity.create('context1', users=['sheldon', 'leonard'])
+        self.server.activity.create('context2', users=['leonard', 'penny'])
+
+        sheldon = self.getClient('sheldon')
+        leonard = self.getClient('leonard')
+        penny = self.getClient('penny')
+
+        self.server.send('activity', 'Hello!', 'context1')
+        self.server.send('activity', 'Hello!', 'context2')
+
+        messages_to_sheldon = sheldon.get_all(retry=True)
+        messages_to_leonard = leonard.get_all(retry=True)
+        messages_to_penny = penny.get_all(retry=True)
+
+        self.assertEqual(len(messages_to_sheldon), 1)
+        self.assertEqual(len(messages_to_leonard), 2)
+        self.assertEqual(len(messages_to_penny), 1)
+
+    def test_basic_drop_context_activity(self):
+        """
+        Given two users in a context
+        When a message is posted to the context
+        Then the message don't reach other users
+        """
+        self.server.create_users(['sheldon', 'leonard', 'penny'])
+        self.server.activity.create('context1', users=['sheldon', 'leonard'])
+
+        sheldon = self.getClient('sheldon')
+        leonard = self.getClient('leonard')
+        penny = self.getClient('penny')
+
+        self.server.send('activity', 'Hello!', 'context1')
+        messages_to_sheldon = sheldon.get_all(retry=True)
+        messages_to_leonard = leonard.get_all(retry=True)
+        messages_to_penny = penny.get_all()
+
+        self.assertEqual(len(messages_to_sheldon), 1)
+        self.assertEqual(len(messages_to_leonard), 1)
+        self.assertEqual(len(messages_to_penny), 0)
