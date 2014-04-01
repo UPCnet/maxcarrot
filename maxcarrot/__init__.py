@@ -45,6 +45,22 @@ class RabbitServer(RabbitWrapper):
         # Define messages queue to conversations to receive messages from all conversations
         self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
 
+    def get_all(self, queue_name):
+        messages = []
+        message_obj = True
+        while message_obj is not None:
+            message_obj = self.get(queue_name)
+            if message_obj is not None:
+                try:
+                    message = message_obj.json()
+                except ValueError:
+                    message = message_obj.body
+                messages.append(message)
+        return messages
+
+    def get(self, queue_name):
+        return self.queues[queue_name].get()
+
     def declare(self):
         for exchange_name, exchange in self.exchanges.items():
             exchange.declare()
