@@ -211,3 +211,22 @@ class FunctionalTests(RabbitTests):
 
     #     self.assertEqual(len(messages_to_sheldon), 1)
     #     self.assertEqual(len(unread_to_queue), 1)
+
+    def test_basic_receive_context_activity(self):
+        """
+        Given two users in a context
+        When a message is posted to the context
+        Then each of them receives both messages
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+        self.server.activity.create('context1', users=['sheldon', 'leonard'])
+
+        sheldon = self.getClient('sheldon')
+        leonard = self.getClient('leonard')
+
+        self.server.send('activity', 'Hello!', 'context1')
+        messages_to_sheldon = sheldon.get_all(retry=True)
+        messages_to_leonard = leonard.get_all(retry=True)
+
+        self.assertEqual(len(messages_to_sheldon), 1)
+        self.assertEqual(len(messages_to_leonard), 1)
