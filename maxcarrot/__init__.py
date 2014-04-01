@@ -11,14 +11,15 @@ class RabbitWrapper(object):
     def get_user_publish_exchange(self, username):
         # Exchange to sent messages to rabbit
         # routed by topic to destination
-        return rabbitpy.Exchange(self.channel, '{}.publish'.format(username), exchange_type='direct')
+        return rabbitpy.Exchange(self.channel, '{}.publish'.format(username), exchange_type='direct', durable=True)
 
     def get_user_subscribe_exchange(self, username):
         # Exchange to broadcast messages for this user to all
         # the consumers identified with this username
 
-        return rabbitpy.Exchange(self.channel, '{}.subscribe'.format(username), exchange_type='fanout')
-
+        return rabbitpy.Exchange(self.channel, '{}.subscribe'.format(username), exchange_type='fanout', durable=True)
+        # Version with alternate exchange enabled
+        #return rabbitpy.Exchange(self.channel, '{}.subscribe'.format(username), exchange_type='fanout', durable=True, arguments={'alternate-exchange': 'unread'})
     def disconnect(self):
         self.connection.close()
 
@@ -32,10 +33,12 @@ class RabbitServer(RabbitWrapper):
         self.exchanges = {}
         self.queues = {}
         # Defne global conversations exchange
-        self.exchanges['conversations'] = rabbitpy.Exchange(self.channel, 'conversations', exchange_type='topic')
+        self.exchanges['conversations'] = rabbitpy.Exchange(self.channel, 'conversations', durable=True, exchange_type='topic')
+        #self.exchanges['unread'] = rabbitpy.Exchange(self.channel, 'unread', durable=True, exchange_type='fanout')
 
         # Define persistent queue for writing messages to max
         self.queues['messages'] = rabbitpy.Queue(self.channel, 'messages', durable=True)
+        #self.queues['unread'] = rabbitpy.Queue(self.channel, 'unread', durable=True)
 
         # Wrapper to interact with conversations
         self.conversations = RabbitConversations(self)
@@ -44,6 +47,7 @@ class RabbitServer(RabbitWrapper):
 
         # Define messages queue to conversations to receive messages from all conversations
         self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
+        #self.queues['unread'].bind(source=self.exchanges['unread'])
 
     def create_user(self, username):
         user_publish_exchange = self.get_user_publish_exchange(username)
@@ -65,17 +69,22 @@ class RabbitServer(RabbitWrapper):
         user_subscribe_exchange = self.get_user_subscribe_exchange(username)
         user_subscribe_exchange.delete()
 
-    def get_all(self, queue_name):
+    def get_all(self, queue_name, retry=False):
         messages = []
         message_obj = True
-        while message_obj is not None:
-            message_obj = self.get(queue_name)
-            if message_obj is not None:
-                try:
-                    message = message_obj.json()
-                except ValueError:
-                    message = message_obj.body
-                messages.append(message)
+        tries = 1 if not retry else -1
+        while not(tries == 0 or messages != []):
+            while message_obj is not None:
+                message_obj = self.get(queue_name)
+                if message_obj is not None:
+                    tries = 1
+                    try:
+                        message = (message_obj.json(), message_obj)
+                    except ValueError:
+                        message = (message_obj.body, message_obj)
+                    messages.append(message)
+            tries -= 1
+            message_obj = True
         return messages
 
     def get(self, queue_name):
@@ -143,9 +152,9 @@ class RabbitClient(RabbitWrapper):
             message_obj = self.get()
             if message_obj is not None:
                 try:
-                    message = message_obj.json()
+                    message = (message_obj.json(), message_obj)
                 except ValueError:
-                    message = message_obj.body
+                    message = (message_obj.body, message_obj)
                 messages.append(message)
         return messages
 

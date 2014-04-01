@@ -192,3 +192,22 @@ class FunctionalTests(RabbitTests):
 
         self.assertIsNone(self.get_exchange('sheldon.publish'))
         self.assertIsNone(self.get_exchange('sheldon.subscribe'))
+
+    # def test_unread(self):
+    #     """
+    #     Given two users in a conversation
+    #     When one of them sends a message
+    #     And the other one is not listening
+    #     Then the message ends in the unread queue
+    #     """
+    #     self.server.create_users(['sheldon', 'leonard'])
+    #     self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
+
+    #     sheldon = self.getClient('sheldon')
+    #     sheldon.send('conversation1', 'hola')
+
+    #     messages_to_sheldon = sheldon.get_all()
+    #     unread_to_queue = self.server.get_all('unread', retry=True)
+
+    #     self.assertEqual(len(messages_to_sheldon), 1)
+    #     self.assertEqual(len(unread_to_queue), 1)
