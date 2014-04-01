@@ -52,6 +52,8 @@ class RabbitServer(RabbitWrapper):
         user_subscribe_exchange = self.get_user_subscribe_exchange(username)
         user_subscribe_exchange.declare()
 
+        user_subscribe_exchange.bind(user_publish_exchange, routing_key='internal')
+
     def create_users(self, usernames):
         for username in usernames:
             self.create_user(username)
@@ -95,27 +97,6 @@ class RabbitConversations(object):
         self.client = wrapper
         self.exchange = rabbitpy.Exchange(self.client.channel, 'conversations', exchange_type='topic')
 
-    def send(self, conversation_id, message):
-        str_message = message if isinstance(message, basestring) else json.dumps(message)
-        message = rabbitpy.Message(self.client.channel, str_message)
-        message.publish(self.client.publish, routing_key=conversation_id)
-
-    def get_all(self, conversation_id):
-        messages = []
-        message_obj = True
-        while message_obj is not None:
-            message_obj = self.get(conversation_id)
-            if message_obj is not None:
-                try:
-                    message = message_obj.json()
-                except ValueError:
-                    message = message_obj.body
-                messages.append(message)
-        return messages
-
-    def get(self, conversation_id):
-        return self.client.queue.get()
-
     def create(self, conversation, users):
         for user in users:
             self.bind_user(conversation, user)
@@ -149,3 +130,24 @@ class RabbitClient(RabbitWrapper):
 
         # Wrapper to interact with conversations
         self.conversations = RabbitConversations(self)
+
+    def send(self, destination, message):
+        str_message = message if isinstance(message, basestring) else json.dumps(message)
+        message = rabbitpy.Message(self.channel, str_message)
+        message.publish(self.publish, routing_key=destination)
+
+    def get_all(self):
+        messages = []
+        message_obj = True
+        while message_obj is not None:
+            message_obj = self.get()
+            if message_obj is not None:
+                try:
+                    message = message_obj.json()
+                except ValueError:
+                    message = message_obj.body
+                messages.append(message)
+        return messages
+
+    def get(self):
+        return self.queue.get()

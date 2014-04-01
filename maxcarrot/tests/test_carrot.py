@@ -1,5 +1,4 @@
 from maxcarrot.tests import RabbitTests
-from rabbitpy.exceptions import AMQPNotFound
 
 
 class FunctionalTests(RabbitTests):
@@ -17,14 +16,41 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         leonard = self.getClient('leonard')
 
-        sheldon.conversations.send('conversation1', 'Hello!')
-        leonard.conversations.send('conversation1', 'Hello...')
+        sheldon.send('conversation1', 'Hello!')
+        leonard.send('conversation1', 'Hello...')
 
-        messages_to_sheldon = sheldon.conversations.get_all('conversation1')
-        messages_to_leonard = leonard.conversations.get_all('conversation1')
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_leonard = leonard.get_all()
 
         self.assertEqual(len(messages_to_sheldon), 2)
         self.assertEqual(len(messages_to_leonard), 2)
+
+    def test_internal_message(self):
+        """
+        Given two users without conversations
+        And one of them has multiple instances
+        When one user send an internal message
+        Then only the instances of that user receives the message
+
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+
+        sheldon = self.getClient('sheldon')
+        sheldon1 = self.getClient('sheldon', reuse=False)
+        sheldon2 = self.getClient('sheldon', reuse=False)
+        leonard = self.getClient('leonard')
+
+        sheldon.send('internal', 'Hello!')
+
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_sheldon1 = sheldon1.get_all()
+        messages_to_sheldon2 = sheldon2.get_all()
+        messages_to_leonard = leonard.get_all()
+
+        self.assertEqual(len(messages_to_sheldon), 1)
+        self.assertEqual(len(messages_to_sheldon1), 1)
+        self.assertEqual(len(messages_to_sheldon2), 1)
+        self.assertEqual(len(messages_to_leonard), 0)
 
     def test_basic_send_receive_all(self):
         """
@@ -40,12 +66,12 @@ class FunctionalTests(RabbitTests):
         leonard = self.getClient('leonard')
         leonard2 = self.getClient('leonard', reuse=False)
 
-        sheldon.conversations.send('conversation1', 'Hello!')
-        leonard.conversations.send('conversation1', 'Hello...')
+        sheldon.send('conversation1', 'Hello!')
+        leonard.send('conversation1', 'Hello...')
 
-        messages_to_sheldon = sheldon.conversations.get_all('conversation1')
-        messages_to_leonard = leonard.conversations.get_all('conversation1')
-        messages_to_leonard2 = leonard2.conversations.get_all('conversation1')
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_leonard = leonard.get_all()
+        messages_to_leonard2 = leonard2.get_all()
 
         self.assertEqual(len(messages_to_sheldon), 2)
         self.assertEqual(len(messages_to_leonard), 2)
@@ -62,8 +88,8 @@ class FunctionalTests(RabbitTests):
         self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
 
         sheldon = self.getClient('sheldon')
-        sheldon.conversations.send('conversation1', 'Hello!')
-        messages_to_sheldon = sheldon.conversations.get_all('conversation1')
+        sheldon.send('conversation1', 'Hello!')
+        messages_to_sheldon = sheldon.get_all()
         messages_to_queue = self.server.get_all('messages')
 
         self.assertEqual(len(messages_to_sheldon), 1)
@@ -83,11 +109,11 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         penny = self.getClient('penny')
 
-        sheldon.conversations.send('conversation1', 'Hello!')
-        penny.conversations.send('conversation2', 'Hello!')
+        sheldon.send('conversation1', 'Hello!')
+        penny.send('conversation2', 'Hello!')
 
-        messages_to_sheldon = sheldon.conversations.get_all('conversation1')
-        messages_to_penny = penny.conversations.get_all('conversation2')
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_penny = penny.get_all()
         messages_to_queue = self.server.get_all('messages')
 
         self.assertEqual(len(messages_to_sheldon), 1)
@@ -108,10 +134,10 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         penny = self.getClient('penny')
 
-        sheldon.conversations.send('conversation2', 'Hello!')
+        sheldon.send('conversation2', 'Hello!')
 
-        messages_to_sheldon = sheldon.conversations.get_all('conversation2')
-        messages_to_penny = penny.conversations.get_all('conversation2')
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_penny = penny.get_all()
         messages_to_queue = self.server.get_all('messages')
 
         self.assertEqual(len(messages_to_sheldon), 0)
@@ -133,11 +159,11 @@ class FunctionalTests(RabbitTests):
 
         self.server.conversations.unbind_user('conversation1', 'sheldon')
 
-        sheldon.conversations.send('conversation1', 'Hello!')
-        leonard.conversations.send('conversation1', 'Hello...')
+        sheldon.send('conversation1', 'Hello!')
+        leonard.send('conversation1', 'Hello...')
 
-        messages_to_sheldon = sheldon.conversations.get_all('conversation1')
-        messages_to_leonard = leonard.conversations.get_all('conversation1')
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_leonard = leonard.get_all()
 
         self.assertEqual(len(messages_to_sheldon), 0)
         self.assertEqual(len(messages_to_leonard), 1)
@@ -151,7 +177,6 @@ class FunctionalTests(RabbitTests):
         self.server.create_users(['sheldon', 'leonard'])
 
         self.assertIsNotNone(self.get_exchange('sheldon.publish'))
-        import ipdb;ipdb.set_trace()
         self.assertIsNotNone(self.get_exchange('sheldon.subscribe'))
 
     def test_delete_user(self):
