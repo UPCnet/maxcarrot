@@ -45,6 +45,24 @@ class RabbitServer(RabbitWrapper):
         # Define messages queue to conversations to receive messages from all conversations
         self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
 
+    def create_user(self, username):
+        user_publish_exchange = self.get_user_publish_exchange(username)
+        user_publish_exchange.declare()
+
+        user_subscribe_exchange = self.get_user_subscribe_exchange(username)
+        user_subscribe_exchange.declare()
+
+    def create_users(self, usernames):
+        for username in usernames:
+            self.create_user(username)
+
+    def delete_user(self, username):
+        user_publish_exchange = self.get_user_publish_exchange(username)
+        user_publish_exchange.delete()
+
+        user_subscribe_exchange = self.get_user_subscribe_exchange(username)
+        user_subscribe_exchange.delete()
+
     def get_all(self, queue_name):
         messages = []
         message_obj = True
@@ -103,17 +121,18 @@ class RabbitConversations(object):
             self.bind_user(conversation, user)
 
     def bind_user(self, conversation, user):
-        # Messages from user to specific conversation
-        # A binding is made for each conversation, this way we limit ilegal posting to unsubscribed conversations
         user_publish_exchange = self.client.get_user_publish_exchange(user)
-        user_publish_exchange.declare()
         self.exchange.bind(user_publish_exchange, routing_key=conversation)
 
-        # Messages from conversation to user
-        # A binding is made for each conversation, to receive only messages from subscribed conversations
         user_subscribe_exchange = self.client.get_user_subscribe_exchange(user)
-        user_subscribe_exchange.declare()
         user_subscribe_exchange.bind(self.exchange, routing_key=conversation)
+
+    def unbind_user(self, conversation, user):
+        user_publish_exchange = self.client.get_user_publish_exchange(user)
+        self.exchange.unbind(user_publish_exchange, routing_key=conversation)
+
+        user_subscribe_exchange = self.client.get_user_subscribe_exchange(user)
+        user_subscribe_exchange.unbind(self.exchange, routing_key=conversation)
 
 
 class RabbitClient(RabbitWrapper):

@@ -23,10 +23,22 @@ class RabbitTests(unittest.TestCase):
             for client in user_clients:
                 client.disconnect()
 
+    def get_exchange_info(self):
+        req = requests.get('{}/exchanges/tests'.format(RABBIT_MANAGEMENT_URL), auth=('guest', 'guest'))
+        return req.json()
+
+    def get_queues_info(self):
+        req = requests.get('{}/queues/tests'.format(RABBIT_MANAGEMENT_URL), auth=('guest', 'guest'))
+        return req.json()
+
+    def get_exchange(self, exchange_name):
+        exchanges = self.get_exchange_info()
+        exchanges = [exchange for exchange in exchanges if exchange['name'] == exchange_name]
+        return exchanges[0] if exchanges else None
+
     def cleanup(self):
         # Delete all exchanges except rabbitmq default ones
-        req = requests.get('{}/exchanges/tests'.format(RABBIT_MANAGEMENT_URL), auth=('guest', 'guest'))
-        for exchange in req.json():
+        for exchange in self.get_exchange_info():
             if not(exchange['name'] and exchange['name'].startswith('amq.')):
                 requests.delete(
                     '{}/exchanges/tests/{}'.format(RABBIT_MANAGEMENT_URL, exchange['name']),
@@ -35,11 +47,8 @@ class RabbitTests(unittest.TestCase):
                 )
 
         # Delete all exchanges except dynamic ones
-        req = requests.get('{}/queues/tests'.format(RABBIT_MANAGEMENT_URL), auth=('guest', 'guest'))
-        for queue in req.json():
-
+        for queue in self.get_queues_info():
             if not queue['name'].startswith('amq.gen'):
-
                 requests.delete(
                     '{}/queues/tests/{}'.format(RABBIT_MANAGEMENT_URL, queue['name']),
                     data=json.dumps({'mode': 'delete', 'vhost': 'tests', 'name': queue['name']}),
