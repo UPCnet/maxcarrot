@@ -5,7 +5,6 @@ import json
 class RabbitWrapper(object):
     def __init__(self, url, username, password, bind=True):
         self.url = 'amqp://{}:{}@{}'.format(username, password, url)
-
         self.connection = rabbitpy.Connection(self.url)
         self.channel = self.connection.channel()
 
@@ -32,7 +31,6 @@ class RabbitServer(RabbitWrapper):
 
         self.exchanges = {}
         self.queues = {}
-
         # Defne global conversations exchange
         self.exchanges['conversations'] = rabbitpy.Exchange(self.channel, 'conversations', exchange_type='topic')
 
