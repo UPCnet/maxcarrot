@@ -3,8 +3,11 @@ import json
 
 
 class RabbitWrapper(object):
-    def __init__(self, url, username, password, bind=True):
-        self.url = 'amqp://{}:{}@{}'.format(username, password, url)
+    def __init__(self, url, username, password, bind):
+        if url.startswith('amqp://'):
+            self.url = url
+        else:
+            self.url = 'amqp://{}:{}@{}'.format(username, password, url)
         self.connection = rabbitpy.Connection(self.url)
         self.channel = self.connection.channel()
 
@@ -28,18 +31,22 @@ class RabbitWrapper(object):
 class RabbitServer(RabbitWrapper):
     """
     """
-    def __init__(self, url, username, password, bind=True):
-        super(RabbitServer, self).__init__(url, username, password)
+    def __init__(self, url, username='guest', password='guest', bind=True):
+        super(RabbitServer, self).__init__(url, username, password, bind)
 
         self.exchanges = {}
         self.queues = {}
         # Defne global conversations exchange
         self.exchanges['conversations'] = rabbitpy.Exchange(self.channel, 'conversations', durable=True, exchange_type='topic')
         self.exchanges['activity'] = rabbitpy.Exchange(self.channel, 'activity', durable=True, exchange_type='direct')
+        self.exchanges['twitter'] = rabbitpy.Exchange(self.channel, 'twitter', durable=True, exchange_type='fanout')
         #self.exchanges['unread'] = rabbitpy.Exchange(self.channel, 'unread', durable=True, exchange_type='fanout')
 
         # Define persistent queue for writing messages to max
         self.queues['messages'] = rabbitpy.Queue(self.channel, 'messages', durable=True)
+        self.queues['push'] = rabbitpy.Queue(self.channel, 'push', durable=True)
+        self.queues['twitter'] = rabbitpy.Queue(self.channel, 'twitter', durable=True)
+        self.queues['twitty_restart'] = rabbitpy.Queue(self.channel, 'tweety_restart', durable=True)
         #self.queues['unread'] = rabbitpy.Queue(self.channel, 'unread', durable=True)
 
         # Wrapper to interact with conversations
@@ -50,6 +57,9 @@ class RabbitServer(RabbitWrapper):
 
         # Define messages queue to conversations to receive messages from all conversations
         self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
+        self.queues['push'].bind(source=self.exchanges['conversations'], routing_key='*')
+        self.queues['push'].bind(source=self.exchanges['activity'], routing_key='*')
+        self.queues['twitter'].bind(source=self.exchanges['twitter'])
         #self.queues['unread'].bind(source=self.exchanges['unread'])
 
     def send(self, exchange, message, routing_key=''):
