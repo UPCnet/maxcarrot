@@ -167,7 +167,7 @@ class RabbitActivity(object):
 
 class RabbitClient(RabbitWrapper):
     def __init__(self, url, username, password, bind=True):
-        super(RabbitClient, self).__init__(url, 'guest', 'guest')
+        super(RabbitClient, self).__init__(url, 'guest', 'guest', bind=bind)
         self.username = username
 
         self.subscribe = self.get_user_subscribe_exchange(self.username)
