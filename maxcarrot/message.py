@@ -2,6 +2,7 @@ import pkg_resources
 import json
 from copy import deepcopy
 import datetime
+from rfc3339 import rfc3339
 from pprint import pformat
 
 # Load specification and make an inverted copy
@@ -24,7 +25,7 @@ class RabbitMessage(dict):
         return self[key]
 
     def prepare(self, params={}):
-        self['published'] = datetime.datetime.utcnow()
+        self['published'] = rfc3339(datetime.datetime.utcnow(), utc=True, use_system_timezone=False)
         self.update(params)
 
     def is_packed(self, message):
