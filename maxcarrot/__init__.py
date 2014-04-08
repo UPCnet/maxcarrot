@@ -3,7 +3,7 @@ import json
 
 
 class RabbitWrapper(object):
-    def __init__(self, url, username, password, bind):
+    def __init__(self, url, username, password):
         if url.startswith('amqp://'):
             self.url = url
         else:
@@ -31,8 +31,8 @@ class RabbitWrapper(object):
 class RabbitServer(RabbitWrapper):
     """
     """
-    def __init__(self, url, username='guest', password='guest', bind=True):
-        super(RabbitServer, self).__init__(url, username, password, bind)
+    def __init__(self, url, username='guest', password='guest', declare=False):
+        super(RabbitServer, self).__init__(url, username, password)
 
         self.exchanges = {}
         self.queues = {}
@@ -53,14 +53,15 @@ class RabbitServer(RabbitWrapper):
         self.conversations = RabbitConversations(self)
         self.activity = RabbitActivity(self)
 
-        self.declare()
+        if declare:
+            self.declare()
 
-        # Define messages queue to conversations to receive messages from all conversations
-        self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
-        self.queues['push'].bind(source=self.exchanges['conversations'], routing_key='*')
-        self.queues['push'].bind(source=self.exchanges['activity'], routing_key='*')
-        self.queues['twitter'].bind(source=self.exchanges['twitter'])
-        #self.queues['unread'].bind(source=self.exchanges['unread'])
+            # Define messages queue to conversations to receive messages from all conversations
+            self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
+            self.queues['push'].bind(source=self.exchanges['conversations'], routing_key='*')
+            self.queues['push'].bind(source=self.exchanges['activity'], routing_key='*')
+            self.queues['twitter'].bind(source=self.exchanges['twitter'])
+            #self.queues['unread'].bind(source=self.exchanges['unread'])
 
     def send(self, exchange, message, routing_key=''):
         str_message = message if isinstance(message, basestring) else json.dumps(message)
@@ -166,8 +167,8 @@ class RabbitActivity(object):
 
 
 class RabbitClient(RabbitWrapper):
-    def __init__(self, url, username, password, bind=True):
-        super(RabbitClient, self).__init__(url, 'guest', 'guest', bind=bind)
+    def __init__(self, url, username, password):
+        super(RabbitClient, self).__init__(url, 'guest', 'guest')
         self.username = username
 
         self.subscribe = self.get_user_subscribe_exchange(self.username)

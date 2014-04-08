@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
-import sys, os
 
 version = '1.0'
 
 requires = [
-    'rabbitpy'
+    'rabbitpy',
+    'requests'
 ]
 test_requires = []
 

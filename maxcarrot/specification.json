@@ -1,0 +1,67 @@
+ {
+    "user": {
+        "id": "u",
+        "type": "string"
+    },
+    "action": {
+        "id": "a",
+        "type": "char",
+        "values": {
+            "add": {
+                "id": "a"
+            },
+            "delete": {
+                "id": "d"
+            },
+            "modify": {
+                "id": "m"
+            }
+        }
+    },
+    "object": {
+        "id": "o",
+        "type": "char",
+        "values": {
+            "message": {
+                "id": "m"
+            },
+            "conversation": {
+                "id": "c"
+            }
+        }
+    },
+    "data": {
+        "id": "d",
+        "type": "object"
+    },
+    "source": {
+        "id": "s",
+        "type": "char",
+        "values": {
+            "max": {
+                "id": "m"
+            },
+            "widget": {
+                "id": "w"
+            },
+            "ios": {
+                "id": "i"
+            },
+            "android": {
+                "id": "a"
+            }
+        }
+    },
+    "domain": {
+        "id": "i",
+        "type": "string"
+    },
+    "version": {
+        "id": "v",
+        "type": "string"
+    },
+    "published": {
+        "id": "p",
+        "type": "date"
+    }
+}

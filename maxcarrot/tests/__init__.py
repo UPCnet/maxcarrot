@@ -14,7 +14,7 @@ class RabbitTests(unittest.TestCase):
 
     def setUp(self):
         self.cleanup()
-        self.server = RabbitServer(TEST_VHOST_URL, 'guest', 'guest', bind=False)
+        self.server = RabbitServer(TEST_VHOST_URL, 'guest', 'guest', declare=True)
         self.clients = {}
 
     def tearDown(self):
