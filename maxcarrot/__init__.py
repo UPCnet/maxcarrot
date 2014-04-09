@@ -14,7 +14,7 @@ class RabbitWrapper(object):
     def get_user_publish_exchange(self, username):
         # Exchange to sent messages to rabbit
         # routed by topic to destination
-        return rabbitpy.Exchange(self.channel, '{}.publish'.format(username), exchange_type='direct', durable=True)
+        return rabbitpy.Exchange(self.channel, '{}.publish'.format(username), exchange_type='topic', durable=True)
 
     def get_user_subscribe_exchange(self, username):
         # Exchange to broadcast messages for this user to all
@@ -57,9 +57,9 @@ class RabbitServer(RabbitWrapper):
             self.declare()
 
             # Define messages queue to conversations to receive messages from all conversations
-            self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*')
-            self.queues['push'].bind(source=self.exchanges['conversations'], routing_key='*')
-            self.queues['push'].bind(source=self.exchanges['activity'], routing_key='*')
+            self.queues['messages'].bind(source=self.exchanges['conversations'], routing_key='*.messages')
+            self.queues['push'].bind(source=self.exchanges['conversations'], routing_key='#')
+            self.queues['push'].bind(source=self.exchanges['activity'], routing_key='#')
             self.queues['twitter'].bind(source=self.exchanges['twitter'])
             #self.queues['unread'].bind(source=self.exchanges['unread'])
 
@@ -131,17 +131,17 @@ class RabbitConversations(object):
 
     def bind_user(self, conversation, user):
         user_publish_exchange = self.client.get_user_publish_exchange(user)
-        self.exchange.bind(user_publish_exchange, routing_key=conversation)
+        self.exchange.bind(user_publish_exchange, routing_key='{}.*'.format(conversation))
 
         user_subscribe_exchange = self.client.get_user_subscribe_exchange(user)
-        user_subscribe_exchange.bind(self.exchange, routing_key=conversation)
+        user_subscribe_exchange.bind(self.exchange, routing_key='{}.*'.format(conversation))
 
     def unbind_user(self, conversation, user):
         user_publish_exchange = self.client.get_user_publish_exchange(user)
-        self.exchange.unbind(user_publish_exchange, routing_key=conversation)
+        self.exchange.unbind(user_publish_exchange, routing_key='{}.*'.format(conversation))
 
         user_subscribe_exchange = self.client.get_user_subscribe_exchange(user)
-        user_subscribe_exchange.unbind(self.exchange, routing_key=conversation)
+        user_subscribe_exchange.unbind(self.exchange, routing_key='{}.*'.format(conversation))
 
 
 class RabbitActivity(object):

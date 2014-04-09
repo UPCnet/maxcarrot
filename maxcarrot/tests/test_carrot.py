@@ -16,8 +16,8 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         leonard = self.getClient('leonard')
 
-        sheldon.send('conversation1', 'Hello!')
-        leonard.send('conversation1', 'Hello...')
+        sheldon.send('conversation1.messages', 'Hello!')
+        leonard.send('conversation1.messages', 'Hello...')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
@@ -66,8 +66,8 @@ class FunctionalTests(RabbitTests):
         leonard = self.getClient('leonard')
         leonard2 = self.getClient('leonard', reuse=False)
 
-        sheldon.send('conversation1', 'Hello!')
-        leonard.send('conversation1', 'Hello...')
+        sheldon.send('conversation1.messages', 'Hello!')
+        leonard.send('conversation1.messages', 'Hello...')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
@@ -82,18 +82,43 @@ class FunctionalTests(RabbitTests):
         Given a conversation
         When a message is posted
         Then the messages queue receives the message
+        and thte push queue receives the message
         And the user also receives the message
         """
         self.server.create_users(['sheldon', 'leonard'])
         self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
 
         sheldon = self.getClient('sheldon')
-        sheldon.send('conversation1', 'Hello!')
+        sheldon.send('conversation1.messages', 'Hello!')
         messages_to_sheldon = sheldon.get_all()
-        messages_to_queue = self.server.get_all('messages')
+        messages_to_messages_queue = self.server.get_all('messages')
+        messages_to_push_queue = self.server.get_all('push')
 
         self.assertEqual(len(messages_to_sheldon), 1)
-        self.assertEqual(len(messages_to_queue), 1)
+        self.assertEqual(len(messages_to_messages_queue), 1)
+        self.assertEqual(len(messages_to_push_queue), 1)
+
+    def test_messages_queue_receive_other_messages(self):
+        """
+        Given a conversation
+        When a message is posted
+        And this message is not a chat message
+        Then the push queue receives the message
+        And and the messages queue don't
+        And the user also receives the message
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+        self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
+
+        sheldon = self.getClient('sheldon')
+        sheldon.send('conversation1.notifications', 'Hello!')
+        messages_to_sheldon = sheldon.get_all()
+        messages_to_messages_queue = self.server.get_all('messages')
+        messages_to_push_queue = self.server.get_all('push')
+
+        self.assertEqual(len(messages_to_sheldon), 1)
+        self.assertEqual(len(messages_to_messages_queue), 0)
+        self.assertEqual(len(messages_to_push_queue), 1)
 
     def test_messages_queue_receive_all(self):
         """
@@ -108,17 +133,18 @@ class FunctionalTests(RabbitTests):
 
         sheldon = self.getClient('sheldon')
         penny = self.getClient('penny')
-
-        sheldon.send('conversation1', 'Hello!')
-        penny.send('conversation2', 'Hello!')
+        sheldon.send('conversation1.messages', 'Hello!')
+        penny.send('conversation2.messages', 'Hello!')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_penny = penny.get_all()
-        messages_to_queue = self.server.get_all('messages')
+        messages_to_messages_queue = self.server.get_all('messages')
+        messages_to_push_queue = self.server.get_all('push')
 
         self.assertEqual(len(messages_to_sheldon), 1)
         self.assertEqual(len(messages_to_penny), 1)
-        self.assertEqual(len(messages_to_queue), 2)
+        self.assertEqual(len(messages_to_messages_queue), 2)
+        self.assertEqual(len(messages_to_push_queue), 2)
 
     def test_drop_messages_to_unbind_conversation(self):
         """
@@ -134,15 +160,17 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         penny = self.getClient('penny')
 
-        sheldon.send('conversation2', 'Hello!')
+        sheldon.send('conversation2.messages', 'Hello!')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_penny = penny.get_all()
-        messages_to_queue = self.server.get_all('messages')
+        messages_to_messages_queue = self.server.get_all('messages')
+        messages_to_push_queue = self.server.get_all('push')
 
         self.assertEqual(len(messages_to_sheldon), 0)
         self.assertEqual(len(messages_to_penny), 0)
-        self.assertEqual(len(messages_to_queue), 0)
+        self.assertEqual(len(messages_to_messages_queue), 0)
+        self.assertEqual(len(messages_to_push_queue), 0)
 
     def test_drop_messages_from_unbind_user(self):
         """
@@ -159,8 +187,8 @@ class FunctionalTests(RabbitTests):
 
         self.server.conversations.unbind_user('conversation1', 'sheldon')
 
-        sheldon.send('conversation1', 'Hello!')
-        leonard.send('conversation1', 'Hello...')
+        sheldon.send('conversation1.messages', 'Hello!')
+        leonard.send('conversation1.messages', 'Hello...')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
@@ -191,26 +219,7 @@ class FunctionalTests(RabbitTests):
         self.server.delete_user('sheldon')
 
         self.assertIsNone(self.get_exchange('sheldon.publish'))
-        self.assertIsNone(self.get_exchange('sheldon.subscribe'))
-
-    # def test_unread(self):
-    #     """
-    #     Given two users in a conversation
-    #     When one of them sends a message
-    #     And the other one is not listening
-    #     Then the message ends in the unread queue
-    #     """
-    #     self.server.create_users(['sheldon', 'leonard'])
-    #     self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
-
-    #     sheldon = self.getClient('sheldon')
-    #     sheldon.send('conversation1', 'hola')
-
-    #     messages_to_sheldon = sheldon.get_all()
-    #     unread_to_queue = self.server.get_all('unread', retry=True)
-
-    #     self.assertEqual(len(messages_to_sheldon), 1)
-    #     self.assertEqual(len(unread_to_queue), 1)
+        self.assertIsNone(self.get_exchange('sheldon.subscribed'))
 
     def test_basic_receive_context_activity(self):
         """

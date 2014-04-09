@@ -4,8 +4,9 @@ version = '1.0'
 
 requires = [
     'rabbitpy',
-    'requests'
-]
+    'requests',
+    'rfc3339',
+  ]
 test_requires = []
 
 setup(name='maxcarrot',
