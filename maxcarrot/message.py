@@ -7,7 +7,23 @@ from pprint import pformat
 
 # Load specification and make an inverted copy
 SPECIFICATION = json.loads(open(pkg_resources.resource_filename(__name__, 'specification.json')).read())
-_SPECIFICATION = {v['id']: {'name': k, 'type': v['type'], 'values': {vv['id']: {'name': kk} for kk, vv in v.get('values', {}).items()}} for k, v in SPECIFICATION.items()}
+_SPECIFICATION = {}
+
+for k, v in SPECIFICATION.items():
+    spec_id = v['id']
+    spec_value = {
+        'name': k,
+        'type': v['type']
+    }
+    for kk, vv in v.get('values', {}).items():
+        spec_value.setdefault('values', {})
+        spec_value['values'][vv['id']] = {'name': kk}
+
+    for kk, vv in v.get('fields', {}).items():
+        spec_value.setdefault('fields', {})
+        spec_value['fields'][vv['id']] = {'name': kk}
+
+    _SPECIFICATION[v['id']] = spec_value
 
 
 class RabbitMessage(dict):
@@ -44,7 +60,15 @@ class RabbitMessage(dict):
                         packed[spec['id']] = packed_value['id']
                 else:
                     packed[spec['id']] = value
-
+                    if spec.get('fields', {}) and spec['type'] == 'object' and isinstance(value, dict):
+                        packed_inner = {}
+                        for inner_field, inner_value in value.items():
+                            if spec['fields'].get(inner_field, None):
+                                packed_key = spec['fields'][inner_field]['id']
+                            else:
+                                packed_key = inner_field
+                            packed_inner[packed_key] = inner_value
+                        packed[spec['id']] = packed_inner
         return packed
 
     @classmethod
@@ -62,5 +86,15 @@ class RabbitMessage(dict):
                         unpacked[spec['name']] = packed_value['name']
                 else:
                     unpacked[spec['name']] = value
+
+                    if spec.get('fields', {}) and spec['type'] == 'object' and isinstance(value, dict):
+                        unpacked_inner = {}
+                        for inner_field, inner_value in value.items():
+                            if spec['fields'].get(inner_field, None):
+                                packed_key = spec['fields'][inner_field]['name']
+                            else:
+                                packed_key = inner_field
+                            unpacked_inner[packed_key] = inner_value
+                        unpacked[spec['name']] = unpacked_inner
         message = RabbitMessage(unpacked)
         return message

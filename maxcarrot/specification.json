@@ -1,7 +1,15 @@
  {
     "user": {
         "id": "u",
-        "type": "string"
+        "type": "object",
+        "fields": {
+            "username": {
+                "id": "u"
+            },
+            "displayname" : {
+                "id": "d"
+            }
+        }
     },
     "action": {
         "id": "a",

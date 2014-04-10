@@ -29,3 +29,15 @@ class FunctionalTests(unittest.TestCase):
         message = RabbitMessage.unpack(packed)
         self.assertEqual(message['action'], 'add')
         self.assertEqual(message['object'], 'message')
+
+    def test_pack_with_object_field(self):
+        unpacked = {'user': {'username': 'foo', 'displayname': 'bar'}}
+        message = RabbitMessage(unpacked)
+        self.assertEqual(message.packed['u']['u'], 'foo')
+        self.assertEqual(message.packed['u']['d'], 'bar')
+
+    def test_unpack_with_object_field(self):
+        packed = {'u': {'u': 'foo', 'd': 'bar'}}
+        message = RabbitMessage.unpack(packed)
+        self.assertEqual(message['user']['username'], 'foo')
+        self.assertEqual(message['user']['displayname'], 'bar')
