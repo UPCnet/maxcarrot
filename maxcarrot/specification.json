@@ -1,4 +1,8 @@
  {
+    "uuid": {
+        "id": "g",
+        "type": "string"
+    },
     "user": {
         "id": "u",
         "type": "object",
