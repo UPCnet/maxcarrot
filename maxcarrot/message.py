@@ -4,6 +4,7 @@ from copy import deepcopy
 import datetime
 from rfc3339 import rfc3339
 from pprint import pformat
+from uuid import uuid1
 
 # Load specification and make an inverted copy
 SPECIFICATION = json.loads(open(pkg_resources.resource_filename(__name__, 'specification.json')).read())
@@ -42,6 +43,7 @@ class RabbitMessage(dict):
 
     def prepare(self, params={}):
         self['published'] = rfc3339(datetime.datetime.utcnow(), utc=True, use_system_timezone=False)
+        self['uuid'] = str(uuid1())
         self.update(params)
 
     def is_packed(self, message):

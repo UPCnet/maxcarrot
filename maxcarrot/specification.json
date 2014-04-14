@@ -39,6 +39,9 @@
             },
             "conversation": {
                 "id": "c"
+            },
+            "tweet": {
+                "id": "t"
             }
         }
     },
@@ -61,7 +64,10 @@
             },
             "android": {
                 "id": "a"
-            }
+            },
+            "tweety": {
+                "id": "t"
+            }            
         }
     },
     "domain": {
