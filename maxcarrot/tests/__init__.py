@@ -3,9 +3,9 @@ import unittest
 import requests
 import json
 
-from maxcarrot import RabbitServer, RabbitClient
+from maxcarrot import RabbitClient
 
-RABBIT_URL = "localhost:5672"
+RABBIT_URL = "amqp://guest:guest@localhost:5672"
 TEST_VHOST_URL = '{}/tests'.format(RABBIT_URL)
 RABBIT_MANAGEMENT_URL = "http://localhost:15672/api".format(RABBIT_URL)
 
@@ -14,7 +14,7 @@ class RabbitTests(unittest.TestCase):
 
     def setUp(self):
         self.cleanup()
-        self.server = RabbitServer(TEST_VHOST_URL, 'guest', 'guest', declare=True)
+        self.server = RabbitClient(TEST_VHOST_URL, declare=True)
         self.clients = {}
 
     def tearDown(self):
@@ -58,7 +58,7 @@ class RabbitTests(unittest.TestCase):
     def getClient(self, username, reuse=True):
         self.clients.setdefault(username, [])
         if not self.clients[username] or not reuse:
-            self.clients[username].append(RabbitClient(TEST_VHOST_URL, username, ''))
+            self.clients[username].append(RabbitClient(TEST_VHOST_URL, user=username))
         if reuse:
             return self.clients[username][0]
         else:

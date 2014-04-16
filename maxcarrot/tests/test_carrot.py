@@ -16,8 +16,8 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         leonard = self.getClient('leonard')
 
-        sheldon.send('conversation1.messages', 'Hello!')
-        leonard.send('conversation1.messages', 'Hello...')
+        sheldon.conversations.send('conversation1', 'Hello!')
+        leonard.conversations.send('conversation1', 'Hello...')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
@@ -40,7 +40,7 @@ class FunctionalTests(RabbitTests):
         sheldon2 = self.getClient('sheldon', reuse=False)
         leonard = self.getClient('leonard')
 
-        sheldon.send('internal', 'Hello!')
+        sheldon.send_internal('Hello!')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_sheldon1 = sheldon1.get_all()
@@ -66,8 +66,8 @@ class FunctionalTests(RabbitTests):
         leonard = self.getClient('leonard')
         leonard2 = self.getClient('leonard', reuse=False)
 
-        sheldon.send('conversation1.messages', 'Hello!')
-        leonard.send('conversation1.messages', 'Hello...')
+        sheldon.conversations.send('conversation1', 'Hello!')
+        leonard.conversations.send('conversation1', 'Hello...')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
@@ -89,7 +89,7 @@ class FunctionalTests(RabbitTests):
         self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
 
         sheldon = self.getClient('sheldon')
-        sheldon.send('conversation1.messages', 'Hello!')
+        sheldon.conversations.send('conversation1', 'Hello!')
         messages_to_sheldon = sheldon.get_all()
         messages_to_messages_queue = self.server.get_all('messages')
         messages_to_push_queue = self.server.get_all('push')
@@ -111,7 +111,7 @@ class FunctionalTests(RabbitTests):
         self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
 
         sheldon = self.getClient('sheldon')
-        sheldon.send('conversation1.notifications', 'Hello!')
+        sheldon.conversations.send('conversation1', 'Hello!', destination='notifications')
         messages_to_sheldon = sheldon.get_all()
         messages_to_messages_queue = self.server.get_all('messages')
         messages_to_push_queue = self.server.get_all('push')
@@ -133,8 +133,8 @@ class FunctionalTests(RabbitTests):
 
         sheldon = self.getClient('sheldon')
         penny = self.getClient('penny')
-        sheldon.send('conversation1.messages', 'Hello!')
-        penny.send('conversation2.messages', 'Hello!')
+        sheldon.conversations.send('conversation1', 'Hello!')
+        penny.conversations.send('conversation2', 'Hello!')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_penny = penny.get_all()
@@ -160,7 +160,7 @@ class FunctionalTests(RabbitTests):
         sheldon = self.getClient('sheldon')
         penny = self.getClient('penny')
 
-        sheldon.send('conversation2.messages', 'Hello!')
+        sheldon.conversations.send('conversation2', 'Hello!')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_penny = penny.get_all()
@@ -187,8 +187,8 @@ class FunctionalTests(RabbitTests):
 
         self.server.conversations.unbind_user('conversation1', 'sheldon')
 
-        sheldon.send('conversation1.messages', 'Hello!')
-        leonard.send('conversation1.messages', 'Hello...')
+        sheldon.conversations.send('conversation1', 'Hello!')
+        leonard.conversations.send('conversation1', 'Hello...')
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()

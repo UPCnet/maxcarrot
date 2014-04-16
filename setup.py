@@ -3,10 +3,11 @@ from setuptools import setup, find_packages
 version = '4.0.1.dev0'
 
 requires = [
-    'rabbitpy',
+    'haigha',
     'requests',
     'rfc3339',
-  ]
+]
+
 test_requires = []
 
 setup(name='maxcarrot',
@@ -14,7 +15,7 @@ setup(name='maxcarrot',
       description="Library to wrap rabbitmq--max bindings and actions",
       long_description="""\
 """,
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='Carles Bruguera',
       author_email='carles.bruguera@upcnet.es',
