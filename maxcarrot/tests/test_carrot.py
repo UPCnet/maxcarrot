@@ -204,8 +204,9 @@ class FunctionalTests(RabbitTests):
         """
         self.server.create_users(['sheldon', 'leonard'])
 
-        self.assertIsNotNone(self.get_exchange('sheldon.publish'))
-        self.assertIsNotNone(self.get_exchange('sheldon.subscribe'))
+        self.server.management.load_exchanges()
+        self.assertIn('sheldon.publish', self.server.management.exchanges_by_name)
+        self.assertIn('sheldon.subscribe', self.server.management.exchanges_by_name)
 
     def test_delete_user(self):
         """
@@ -218,8 +219,9 @@ class FunctionalTests(RabbitTests):
 
         self.server.delete_user('sheldon')
 
-        self.assertIsNone(self.get_exchange('sheldon.publish'))
-        self.assertIsNone(self.get_exchange('sheldon.subscribed'))
+        self.server.management.load_exchanges()
+        self.assertNotIn('sheldon.publish', self.server.management.exchanges_by_name)
+        self.assertNotIn('sheldon.subscribe', self.server.management.exchanges_by_name)
 
     def test_basic_receive_context_activity(self):
         """

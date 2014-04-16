@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from haigha.connections import RabbitConnection
 from haigha.message import Message
+from maxcarrot.management import RabbitManagement
 
 import json
 import re
@@ -50,9 +51,13 @@ class RabbitClient(object):
         if declare:
             self.declare()
 
+        self.exchange_specs_by_name = {spec['name']: spec for spec in self.resource_specs['exchanges']}
+        self.queue_specs_by_name = {spec['name']: spec for spec in self.resource_specs['queues']}
+
         # Wrapper to interact with conversations
         self.conversations = RabbitConversations(self)
         self.activity = RabbitActivity(self)
+        self.management = RabbitManagement(self, 'http://{}:15672/api'.format(self.host), self.vhost, self.user, self.password)
 
         if user is not None:
             self.bind(user)
@@ -70,7 +75,6 @@ class RabbitClient(object):
         parts = re.search(r'amqp://(\w+):(\w+)@([^\:]+)\:(\d+)\/(.*)\/?', url).groups()
         self.user, self.password, self.host, self.port, self.vhost_url = parts
         self.vhost = self.vhost_url.replace('%2F', '/')
-
         self.connection = RabbitConnection(
             user=self.user, password=self.password,
             vhost=self.vhost, host=self.host,
@@ -131,13 +135,13 @@ class RabbitClient(object):
         """
         self.ch.exchange.declare(
             exchange=self.user_publish_exchange(username),
-            type=self.spec_by_name('exchanges', 'user_publish')['type'],
+            type=self.exchange_specs_by_name['user_publish']['type'],
             durable=True
         )
 
         self.ch.exchange.declare(
             exchange=self.user_subscribe_exchange(username),
-            type=self.spec_by_name('exchanges', 'user_subscribe')['type'],
+            type=self.exchange_specs_by_name['user_subscribe']['type'],
             durable=True
         )
 
