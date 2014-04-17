@@ -97,20 +97,22 @@ class RabbitClient(object):
                 self.ch.exchange.declare(
                     exchange=exchange['name'],
                     type=exchange['type'],
-                    durable=True
+                    durable=True,
+                    auto_delete=False
                 )
 
         for queue in self.resource_specs['queues']:
             if queue.get('global', True) and not queue.get('native', False):
                 self.ch.queue.declare(
                     queue=queue['name'],
-                    durable=True
+                    durable=True,
+                    auto_delete=False
                 )
                 for binding in queue.get('bindings', []):
                     self.ch.queue.bind(
                         queue=queue['name'],
                         exchange=binding['exchange'],
-                        routing_key=binding.get('routing_key', '')
+                        routing_key=binding.get('routing_key', ''),
                     )
 
     def bind(self, username):
@@ -136,19 +138,21 @@ class RabbitClient(object):
         self.ch.exchange.declare(
             exchange=self.user_publish_exchange(username),
             type=self.exchange_specs_by_name['user_publish']['type'],
-            durable=True
+            durable=True,
+            auto_delete=False
         )
 
         self.ch.exchange.declare(
             exchange=self.user_subscribe_exchange(username),
             type=self.exchange_specs_by_name['user_subscribe']['type'],
-            durable=True
+            durable=True,
+            auto_delete=False
         )
 
         self.ch.exchange.bind(
             exchange=self.user_subscribe_exchange(username),
             source=self.user_publish_exchange(username),
-            routing_key='internal'
+            routing_key='internal',
         )
 
     def delete_user(self, username):

@@ -1,6 +1,7 @@
 import requests
 import re
 
+
 class RabbitManagement(object):
     def __init__(self, client, url, vhost, user, password):
         self.url = url
