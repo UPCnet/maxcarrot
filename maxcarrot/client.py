@@ -22,7 +22,7 @@ class RabbitClient(object):
         'exchanges': [
             {'name': 'conversations', 'spec': 'conversations', 'type': 'topic'},
             {'name': 'twitter', 'spec': 'twitter', 'type': 'fanout'},
-            {'name': 'activity', 'spec': 'activity', 'type': 'direct'},
+            {'name': 'activity', 'spec': 'activity', 'type': 'topic'},
             {'name': 'user_subscribe', 'spec': '.*?.subscribe', 'type': 'fanout', 'global': False},
             {'name': 'user_publish', 'spec': '.*?.publish', 'type': 'topic', 'global': False},
             {'name': 'default', 'spec': '^$', 'type': 'direct', 'native': True},

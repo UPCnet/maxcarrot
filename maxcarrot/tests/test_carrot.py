@@ -238,9 +238,11 @@ class FunctionalTests(RabbitTests):
         self.server.send('activity', 'Hello!', 'context1')
         messages_to_sheldon = sheldon.get_all(retry=True)
         messages_to_leonard = leonard.get_all(retry=True)
+        messages_to_push_queue = self.server.get_all('push')
 
         self.assertEqual(len(messages_to_sheldon), 1)
         self.assertEqual(len(messages_to_leonard), 1)
+        self.assertEqual(len(messages_to_push_queue), 1)
 
     def test_basic_receive_multiple_context_activity(self):
         """
