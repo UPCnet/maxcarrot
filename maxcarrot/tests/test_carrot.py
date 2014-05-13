@@ -111,12 +111,15 @@ class FunctionalTests(RabbitTests):
         self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
 
         sheldon = self.getClient('sheldon')
+        leonard = self.getClient('leonard')
         sheldon.conversations.send('conversation1', 'Hello!', destination='notifications')
         messages_to_sheldon = sheldon.get_all()
+        messages_to_leonard = leonard.get_all()
         messages_to_messages_queue = self.server.get_all('messages')
         messages_to_push_queue = self.server.get_all('push')
 
         self.assertEqual(len(messages_to_sheldon), 1)
+        self.assertEqual(len(messages_to_leonard), 1)
         self.assertEqual(len(messages_to_messages_queue), 0)
         self.assertEqual(len(messages_to_push_queue), 1)
 
