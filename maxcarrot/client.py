@@ -34,7 +34,7 @@ class RabbitClient(object):
                 {'exchange': 'conversations', 'routing_key': '*.messages'}
             ]},
             {'name': 'push', 'spec': 'push', 'bindings': [
-                {'exchange': 'conversations', 'routing_key': '#'},
+                {'exchange': 'conversations', 'routing_key': '*.notifications'},
                 {'exchange': 'activity', 'routing_key': '#'}
             ]},
             {'name': 'twitter', 'spec': 'twitter', 'bindings': [

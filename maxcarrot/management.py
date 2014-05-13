@@ -22,7 +22,8 @@ class RabbitManagement(object):
         self.client.ch.exchange.delete(name)
 
     def delete_queue(self, name):
-        self.client.ch.queue.delete(name)
+        if not name.startswith('amq.get'):
+            self.client.ch.queue.delete(name)
 
     def load_exchanges(self):
         req = requests.get('{}/exchanges/{}'.format(self.url, self.vhost_url), auth=self.auth)

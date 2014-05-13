@@ -30,7 +30,11 @@
             },
             "refresh": {
                 "id": "r"
+            },
+            "ack": {
+                "id": "k"
             }
+
         }
     },
     "object": {
@@ -73,7 +77,11 @@
             },
             "tweety": {
                 "id": "t"
+            },
+            "maxbunny": {
+                "id": "b"
             }
+
         }
     },
     "domain": {
