@@ -22,7 +22,7 @@ class RabbitManagement(object):
         self.client.ch.exchange.delete(name)
 
     def delete_queue(self, name):
-        if not name.startswith('amq.get'):
+        if not name.startswith('amq.gen'):
             self.client.ch.queue.delete(name)
 
     def load_exchanges(self):
