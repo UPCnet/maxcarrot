@@ -27,6 +27,9 @@
             },
             "modify": {
                 "id": "m"
+            },
+            "refresh": {
+                "id": "r"
             }
         }
     },
