@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from haigha.connections import RabbitConnection
+from haigha.connections.rabbit_connection import RabbitConnection
 from haigha.message import Message
 from maxcarrot.management import RabbitManagement
 
