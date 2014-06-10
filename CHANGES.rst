@@ -1,7 +1,7 @@
 Changelog
 =========
 
-4.0.1 (unreleased)
+4.0.2 (2014-06-10)
 ------------------
 
  * More strict exchange and queue matching for cleanup Load only queues and exchanges for current vhost [Carles Bruguera]
