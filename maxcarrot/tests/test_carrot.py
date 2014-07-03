@@ -82,7 +82,7 @@ class FunctionalTests(RabbitTests):
         Given a conversation
         When a message is posted
         Then the messages queue receives the message
-        and thte push queue receives the message
+        And thte push queue doesn't receive the message
         And the user also receives the message
         """
         self.server.create_users(['sheldon', 'leonard'])
@@ -96,7 +96,7 @@ class FunctionalTests(RabbitTests):
 
         self.assertEqual(len(messages_to_sheldon), 1)
         self.assertEqual(len(messages_to_messages_queue), 1)
-        self.assertEqual(len(messages_to_push_queue), 1)
+        self.assertEqual(len(messages_to_push_queue), 0)
 
     def test_messages_queue_receive_other_messages(self):
         """
@@ -147,7 +147,7 @@ class FunctionalTests(RabbitTests):
         self.assertEqual(len(messages_to_sheldon), 1)
         self.assertEqual(len(messages_to_penny), 1)
         self.assertEqual(len(messages_to_messages_queue), 2)
-        self.assertEqual(len(messages_to_push_queue), 2)
+        self.assertEqual(len(messages_to_push_queue), 0)
 
     def test_drop_messages_to_unbind_conversation(self):
         """
