@@ -226,6 +226,39 @@ class FunctionalTests(RabbitTests):
         self.assertNotIn('sheldon.publish', self.server.management.exchanges_by_name)
         self.assertNotIn('sheldon.subscribe', self.server.management.exchanges_by_name)
 
+    def test_delete_conversation(self):
+        """
+        Given two users in a conversation
+        When the conversation gets removed from the system
+        Then it's associated bindings disappear
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+        self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
+
+        self.server.conversations.delete('conversation1')
+
+        bindings = self.server.management.load_exchange_bindings('conversations')
+        conversation1_bindings = [binding for binding in bindings if binding['routing_key'].startswith('conversation1')]
+        self.assertEqual(len(conversation1_bindings), 0)
+
+    def test_delete_conversation_others_remain(self):
+        """
+        Given two users in a two conversations
+        When a conversation gets removed from the system
+        Then it's associated bindings disappear
+        And the other conversation remains
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+        self.server.conversations.create('conversation1', users=['sheldon', 'leonard'])
+        self.server.conversations.create('conversation2', users=['sheldon', 'leonard'])
+
+        self.server.conversations.delete('conversation1')
+
+        bindings = self.server.management.load_exchange_bindings('conversations')
+
+        conversation_bindings = [binding for binding in bindings if binding['routing_key'].startswith('conversation')]
+        self.assertEqual(len(conversation_bindings), 4)
+
     def test_basic_receive_context_activity(self):
         """
         Given two users in a context
@@ -293,3 +326,36 @@ class FunctionalTests(RabbitTests):
         self.assertEqual(len(messages_to_sheldon), 1)
         self.assertEqual(len(messages_to_leonard), 1)
         self.assertEqual(len(messages_to_penny), 0)
+
+    def test_delete_context(self):
+        """
+        Given two users in a conversation
+        When the conversation gets removed from the system
+        Then it's associated bindings disappear
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+        self.server.activity.create('context1', users=['sheldon', 'leonard'])
+
+        self.server.activity.delete('context1')
+
+        bindings = self.server.management.load_exchange_bindings('activity')
+        context_bindings = [binding for binding in bindings if binding['routing_key'].startswith('context1')]
+        self.assertEqual(len(context_bindings), 0)
+
+    def test_delete_context_others_remain(self):
+        """
+        Given two users in a two conversations
+        When a conversation gets removed from the system
+        Then it's associated bindings disappear
+        And the other conversation remains
+        """
+        self.server.create_users(['sheldon', 'leonard'])
+        self.server.activity.create('context1', users=['sheldon', 'leonard'])
+        self.server.activity.create('context2', users=['sheldon', 'leonard'])
+
+        self.server.activity.delete('context1')
+
+        bindings = self.server.management.load_exchange_bindings('activity')
+
+        context_bindings = [binding for binding in bindings if binding['routing_key'].startswith('context')]
+        self.assertEqual(len(context_bindings), 2)

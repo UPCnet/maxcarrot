@@ -1,5 +1,6 @@
 import requests
 import re
+from itertools import chain
 
 
 class RabbitManagement(object):
@@ -38,6 +39,11 @@ class RabbitManagement(object):
         self.queues_by_name.clear()
         for queue in self.queues:
             self.queues_by_name[queue['name']] = queue
+
+    def load_exchange_bindings(self, exchange):
+        resp_source = requests.get('{}/exchanges/{}/{}/bindings/source'.format(self.url, self.vhost_url, exchange), auth=self.auth)
+        resp_destination = requests.get('{}/exchanges/{}/{}/bindings/destination'.format(self.url, self.vhost_url, exchange), auth=self.auth)
+        return chain(resp_source.json(), resp_destination.json())
 
     def cleanup(self, delete_all=False):
         self.load_exchanges()

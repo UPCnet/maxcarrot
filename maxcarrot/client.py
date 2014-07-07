@@ -258,6 +258,19 @@ class RabbitConversations(object):
             routing_key='{}.*'.format(conversation)
         )
 
+    def delete(self, conversation):
+        """
+            Deletes all the bindings for a specific conversation
+        """
+        bindings = self.client.management.load_exchange_bindings('conversations')
+        for binding in bindings:
+            if binding['routing_key'].startswith(conversation):
+                self.client.ch.exchange.unbind(
+                    exchange=binding['destination'],
+                    source=binding['source'],
+                    routing_key=binding['routing_key']
+                )
+
 
 class RabbitActivity(object):
     """
@@ -296,3 +309,16 @@ class RabbitActivity(object):
             source='activity',
             routing_key=context
         )
+
+    def delete(self, context):
+        """
+            Deletes all the bindings for a specific conversation
+        """
+        bindings = self.client.management.load_exchange_bindings('activity')
+        for binding in bindings:
+            if binding['routing_key'].startswith(context):
+                self.client.ch.exchange.unbind(
+                    exchange=binding['destination'],
+                    source=binding['source'],
+                    routing_key=binding['routing_key']
+                )
