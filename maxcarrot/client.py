@@ -57,7 +57,7 @@ class RabbitClient(object):
         # Wrapper to interact with conversations
         self.conversations = RabbitConversations(self)
         self.activity = RabbitActivity(self)
-        self.management = RabbitManagement(self, 'http://{}:15672/api'.format(self.host), self.vhost, self.user, self.password)
+        self.management = RabbitManagement(self, 'http://{}:15672/api'.format(self.host), self.vhost_url, self.user, self.password)
 
         if user is not None:
             self.bind(user)

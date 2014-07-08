@@ -43,7 +43,10 @@ class RabbitManagement(object):
     def load_exchange_bindings(self, exchange):
         resp_source = requests.get('{}/exchanges/{}/{}/bindings/source'.format(self.url, self.vhost_url, exchange), auth=self.auth)
         resp_destination = requests.get('{}/exchanges/{}/{}/bindings/destination'.format(self.url, self.vhost_url, exchange), auth=self.auth)
-        return chain(resp_source.json(), resp_destination.json())
+
+        source_bindings = resp_source.json() if resp_source.status_code == 200 else []
+        destination_bindings = resp_destination.json() if resp_destination.status_code == 200 else []
+        return chain(source_bindings, destination_bindings)
 
     def cleanup(self, delete_all=False):
         self.load_exchanges()
