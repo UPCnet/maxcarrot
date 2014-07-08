@@ -1,11 +1,13 @@
 Changelog
 =========
 
-4.0.3 (unreleased)
+4.0.3 (2014-07-08)
 ------------------
 
-- Nothing changed yet.
-
+* Preserve special slash chars [Carles Bruguera]
+* Reorganize tests [Carles Bruguera]
+* Unbind users from contexts and conversations [Carles Bruguera]
+* Fix tests [Carles Bruguera]
 
 4.0.2 (2014-06-10)
 ------------------
