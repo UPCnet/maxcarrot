@@ -1,11 +1,10 @@
 Changelog
 =========
 
-4.0.4 (unreleased)
+4.0.4 (2014-07-29)
 ------------------
 
-- Nothing changed yet.
-
+* Add optional Destination field for the routing key [Carles Bruguera]
 
 4.0.3 (2014-07-08)
 ------------------
