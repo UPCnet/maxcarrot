@@ -95,5 +95,9 @@
     "published": {
         "id": "p",
         "type": "date"
+    },
+    "destination": {
+        "id": "t",
+        "type": "string"
     }
 }
