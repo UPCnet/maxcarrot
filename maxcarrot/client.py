@@ -4,6 +4,7 @@ from haigha.message import Message
 from maxcarrot.management import RabbitManagement
 
 import json
+import pkg_resources
 import re
 
 
@@ -17,6 +18,11 @@ class RabbitClient(object):
         * Exchanges and queues that need to be created always are marked as global
 
     """
+
+    __client_properties__ = {
+        'library': 'haigha',
+        'library-version': pkg_resources.require('haigha')[0].version
+    }
 
     resource_specs = {
         'exchanges': [
@@ -45,7 +51,8 @@ class RabbitClient(object):
         ]
     }
 
-    def __init__(self, url, declare=False, user=None):
+    def __init__(self, url, declare=False, user=None, client_properties={}):
+        self.__client_properties__.update(client_properties)
         self.connect(url)
 
         if declare:
@@ -75,10 +82,11 @@ class RabbitClient(object):
         parts = re.search(r'amqp://(\w+):(\w+)@([^\:]+)\:(\d+)\/(.*)\/?', url).groups()
         self.user, self.password, self.host, self.port, self.vhost_url = parts
         self.vhost = self.vhost_url.replace('%2F', '/')
+
         self.connection = RabbitConnection(
             user=self.user, password=self.password,
             vhost=self.vhost, host=self.host,
-            heartbeat=None, debug=True)
+            heartbeat=None, debug=True, client_properties=self.__client_properties__)
         self.ch = self.connection.channel()
 
     def disconnect(self):
