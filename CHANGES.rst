@@ -1,11 +1,10 @@
 Changelog
 =========
 
-4.0.5 (unreleased)
+4.0.5 (2014-10-27)
 ------------------
 
-- Nothing changed yet.
-
+* Set haigha client_properties [Carles Bruguera]
 
 4.0.4 (2014-07-29)
 ------------------
