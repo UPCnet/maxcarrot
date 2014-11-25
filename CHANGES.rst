@@ -1,11 +1,10 @@
 Changelog
 =========
 
-4.0.7 (unreleased)
+4.0.7 (2014-11-25)
 ------------------
 
-- Nothing changed yet.
-
+* Disable microseconds [Carles Bruguera]
 
 4.0.6 (2014-11-25)
 ------------------
