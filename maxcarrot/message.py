@@ -49,7 +49,7 @@ class RabbitMessage(dict):
     def prepare(self, params={}):
         now = datetime.datetime.utcnow()
         self['published'] = rfc3339(now, utc=True, use_system_timezone=False)
-        self['published'] = self['published'].replace('Z', '.{}Z'.format(now.microsecond))
+        #self['published'] = self['published'].replace('Z', '.{}Z'.format(now.microsecond))
         self['uuid'] = str(uuid1())
         self.update(params)
 
