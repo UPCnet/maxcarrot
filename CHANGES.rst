@@ -1,11 +1,10 @@
 Changelog
 =========
 
-4.0.6 (unreleased)
+4.0.6 (2014-11-25)
 ------------------
 
-- Nothing changed yet.
-
+* Parsing guards [Carles Bruguera]
 
 4.0.5 (2014-10-27)
 ------------------
