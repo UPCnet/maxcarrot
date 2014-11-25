@@ -10,6 +10,11 @@ from uuid import uuid1
 SPECIFICATION = json.loads(open(pkg_resources.resource_filename(__name__, 'specification.json')).read())
 _SPECIFICATION = {}
 
+
+class MaxCarrotParsingError(Exception):
+    """
+    """
+
 for k, v in SPECIFICATION.items():
     spec_id = v['id']
     spec_value = {
@@ -42,7 +47,9 @@ class RabbitMessage(dict):
         return self[key]
 
     def prepare(self, params={}):
-        self['published'] = rfc3339(datetime.datetime.utcnow(), utc=True, use_system_timezone=False)
+        now = datetime.datetime.utcnow()
+        self['published'] = rfc3339(now, utc=True, use_system_timezone=False)
+        self['published'] = self['published'].replace('Z', '.{}Z'.format(now.microsecond))
         self['uuid'] = str(uuid1())
         self.update(params)
 
@@ -77,26 +84,36 @@ class RabbitMessage(dict):
     def unpack(self, packed):
         unpacked = {}
 
-        for field, value in packed.items():
-            if field in _SPECIFICATION:
-                spec = _SPECIFICATION[field]
-                if spec.get('values', {}):
-                    packed_value = None
-                    if isinstance(value, str) or isinstance(value, unicode):
-                        packed_value = spec['values'].get(value, None)
-                    if packed_value is not None:
-                        unpacked[spec['name']] = packed_value['name']
-                else:
-                    unpacked[spec['name']] = value
+        # Try to decode json
+        _packed = packed if isinstance(packed, dict) else json.loads(packed)
 
-                    if spec.get('fields', {}) and spec['type'] == 'object' and isinstance(value, dict):
-                        unpacked_inner = {}
-                        for inner_field, inner_value in value.items():
-                            if spec['fields'].get(inner_field, None):
-                                packed_key = spec['fields'][inner_field]['name']
-                            else:
-                                packed_key = inner_field
-                            unpacked_inner[packed_key] = inner_value
-                        unpacked[spec['name']] = unpacked_inner
+        if not isinstance(_packed, dict):
+            raise MaxCarrotParsingError('Packed message is not json')
+
+        try:
+            for field, value in _packed.items():
+                if field in _SPECIFICATION:
+                    spec = _SPECIFICATION[field]
+                    if spec.get('values', {}):
+                        packed_value = None
+                        if isinstance(value, str) or isinstance(value, unicode):
+                            packed_value = spec['values'].get(value, None)
+                        if packed_value is not None:
+                            unpacked[spec['name']] = packed_value['name']
+                    else:
+                        unpacked[spec['name']] = value
+
+                        if spec.get('fields', {}) and spec['type'] == 'object' and isinstance(value, dict):
+                            unpacked_inner = {}
+                            for inner_field, inner_value in value.items():
+                                if spec['fields'].get(inner_field, None):
+                                    packed_key = spec['fields'][inner_field]['name']
+                                else:
+                                    packed_key = inner_field
+                                unpacked_inner[packed_key] = inner_value
+                            unpacked[spec['name']] = unpacked_inner
+        except:
+            raise MaxCarrotParsingError('Spec parsing error')
+
         message = RabbitMessage(unpacked)
         return message
