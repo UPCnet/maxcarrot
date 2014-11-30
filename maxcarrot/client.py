@@ -139,23 +139,24 @@ class RabbitClient(object):
         for username in usernames:
             self.create_user(username)
 
-    def create_user(self, username):
+    def create_user(self, username, create_exchanges=True):
         """
             Creates user exchanges and internal binding
         """
-        self.ch.exchange.declare(
-            exchange=self.user_publish_exchange(username),
-            type=self.exchange_specs_by_name['user_publish']['type'],
-            durable=True,
-            auto_delete=False
-        )
+        if create_exchanges:
+            self.ch.exchange.declare(
+                exchange=self.user_publish_exchange(username),
+                type=self.exchange_specs_by_name['user_publish']['type'],
+                durable=True,
+                auto_delete=False
+            )
 
-        self.ch.exchange.declare(
-            exchange=self.user_subscribe_exchange(username),
-            type=self.exchange_specs_by_name['user_subscribe']['type'],
-            durable=True,
-            auto_delete=False
-        )
+            self.ch.exchange.declare(
+                exchange=self.user_subscribe_exchange(username),
+                type=self.exchange_specs_by_name['user_subscribe']['type'],
+                durable=True,
+                auto_delete=False
+            )
 
         self.ch.exchange.bind(
             exchange=self.user_subscribe_exchange(username),
