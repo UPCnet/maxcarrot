@@ -1,11 +1,11 @@
 Changelog
 =========
 
-4.0.9 (unreleased)
+4.0.9 (2014-12-01)
 ------------------
 
-- Nothing changed yet.
-
+* method to delete exchange bindings [Carles Bruguera]
+* Don't delete dynamic queues [Carles Bruguera]
 
 4.0.8 (2014-12-01)
 ------------------
