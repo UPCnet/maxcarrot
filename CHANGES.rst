@@ -1,11 +1,10 @@
 Changelog
 =========
 
-4.0.8 (unreleased)
+4.0.8 (2014-12-01)
 ------------------
 
-- Nothing changed yet.
-
+* Conditional exchange creation [Carles Bruguera]
 
 4.0.7 (2014-11-25)
 ------------------
