@@ -35,7 +35,7 @@ class RabbitClient(object):
             {'name': 'internal', 'spec': 'amq\..*?', 'type': '.*', 'native': True},
         ],
         'queues': [
-            {'name': 'dynamic', 'spec': 'amq\..*?', 'native': True},
+            {'name': 'dynamic', 'spec': 'amq\..*?', 'native': True, 'durable': False, 'auto_delete': True},
             {'name': 'messages', 'spec': 'messages', 'bindings': [
                 {'exchange': 'conversations', 'routing_key': '*.messages'}
             ]},

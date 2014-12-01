@@ -26,6 +26,9 @@ class RabbitManagement(object):
         if not name.startswith('amq.gen'):
             self.client.ch.queue.delete(name)
 
+    def delete_binding(self, source, destination, routing_key):
+        requests.delete('{}/bindings/{}/e/{}/e/{}/{}'.format(self.url, self.vhost_url, source, destination, routing_key), auth=self.auth)
+
     def load_exchanges(self):
         req = requests.get('{}/exchanges/{}'.format(self.url, self.vhost_url), auth=self.auth)
         self.exchanges = [a for a in req.json() if a['vhost'] == self.vhost]
@@ -77,6 +80,8 @@ class RabbitManagement(object):
                     autodelete_match = queue_definition.get('auto_delete', False) == queue['auto_delete']
                     durable_match = queue_definition.get('durable', True) == queue['durable']
                     if not autodelete_match or not durable_match:
+                        if 'gen' in queue['name']:
+                            import ipdb;ipdb.set_trace()
                         print 'Deleting non maching queue "{name}"'.format(**queue)
                         self.delete_queue(queue['name'])
 
