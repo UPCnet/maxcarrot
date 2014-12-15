@@ -1,6 +1,7 @@
 import requests
 import re
 from itertools import chain
+import json
 
 
 class RabbitManagement(object):
@@ -28,6 +29,12 @@ class RabbitManagement(object):
 
     def delete_binding(self, source, destination, routing_key):
         requests.delete('{}/bindings/{}/e/{}/e/{}/{}'.format(self.url, self.vhost_url, source, destination, routing_key), auth=self.auth)
+
+    def force_close(self, remote, message="Closed via MaxCarrot"):
+        payload = json.dumps({
+            "name": remote,
+            "reason": message})
+        requests.delete('{}/connections/{}'.format(self.url, remote), data=payload, auth=self.auth)
 
     def load_exchanges(self):
         req = requests.get('{}/exchanges/{}'.format(self.url, self.vhost_url), auth=self.auth)
