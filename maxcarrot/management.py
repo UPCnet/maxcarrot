@@ -31,6 +31,9 @@ class RabbitManagement(object):
         requests.delete('{}/bindings/{}/e/{}/e/{}/{}'.format(self.url, self.vhost_url, source, destination, routing_key), auth=self.auth)
 
     def force_close(self, remote, message="Closed via MaxCarrot"):
+        # Fix ipv6 format bug
+        remote = remote.replace('::1', '[::1]')
+
         payload = json.dumps({
             "name": remote,
             "reason": message})
