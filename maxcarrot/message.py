@@ -5,6 +5,7 @@ import datetime
 from rfc3339 import rfc3339
 from pprint import pformat
 from uuid import uuid1
+import re
 
 # Load specification and make an inverted copy
 SPECIFICATION = json.loads(open(pkg_resources.resource_filename(__name__, 'specification.json')).read())
@@ -49,7 +50,7 @@ class RabbitMessage(dict):
     def prepare(self, params={}):
         now = datetime.datetime.utcnow()
         self['published'] = rfc3339(now, utc=True, use_system_timezone=False)
-        #self['published'] = self['published'].replace('Z', '.{}Z'.format(now.microsecond))
+        # self['published'] = self['published'].replace('Z', '.{}Z'.format(now.microsecond))
         self['uuid'] = str(uuid1())
         self.update(params)
 
@@ -80,12 +81,24 @@ class RabbitMessage(dict):
                         packed[spec['id']] = packed_inner
         return packed
 
+    @staticmethod
+    def normalize_json(message):
+        def control_char_replace(matchobj):
+            return matchobj.group()[0].encode('string_escape')
+        normalized = re.sub(r'[\n\t\r\f\b\/\\]', control_char_replace, message)
+        return normalized
+
     @classmethod
-    def unpack(self, packed):
+    def unpack(cls, packed):
         unpacked = {}
 
-        # Try to decode json
-        _packed = packed if isinstance(packed, dict) else json.loads(packed)
+        if isinstance(packed, dict):
+            _packed = packed
+        else:
+            try:
+                _packed = json.loads(cls.normalize_json(packed))
+            except:
+                raise MaxCarrotParsingError('JSON decoding error')
 
         if not isinstance(_packed, dict):
             raise MaxCarrotParsingError('Packed message is not json')
@@ -115,5 +128,5 @@ class RabbitMessage(dict):
         except:
             raise MaxCarrotParsingError('Spec parsing error')
 
-        message = RabbitMessage(unpacked)
+        message = cls(unpacked)
         return message

@@ -41,3 +41,14 @@ class FunctionalTests(unittest.TestCase):
         message = RabbitMessage.unpack(packed)
         self.assertEqual(message['user']['username'], 'foo')
         self.assertEqual(message['user']['displayname'], 'bar')
+
+    def test_unpack_from_string(self):
+        packed = '{"a": "a", "o": "m"}'
+        message = RabbitMessage.unpack(packed)
+        self.assertEqual(message['action'], 'add')
+        self.assertEqual(message['object'], 'message')
+
+    def test_unpack_from_string_with_newlines(self):
+        packed = '{"d": {"text": "this is a\nline break"}}'
+        message = RabbitMessage.unpack(packed)
+        self.assertEqual(message['data']['text'], 'this is a\nline break')
