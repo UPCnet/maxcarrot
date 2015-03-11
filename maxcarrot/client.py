@@ -28,6 +28,7 @@ class RabbitClient(object):
         'exchanges': [
             {'name': 'conversations', 'spec': 'conversations', 'type': 'topic'},
             {'name': 'twitter', 'spec': 'twitter', 'type': 'fanout'},
+            {'name': 'syncacl', 'spec': 'syncacl', 'type': 'fanout'},
             {'name': 'activity', 'spec': 'activity', 'type': 'topic'},
             {'name': 'user_subscribe', 'spec': '.*?.subscribe', 'type': 'fanout', 'global': False},
             {'name': 'user_publish', 'spec': '.*?.publish', 'type': 'topic', 'global': False},
@@ -45,6 +46,9 @@ class RabbitClient(object):
             ]},
             {'name': 'twitter', 'spec': 'twitter', 'bindings': [
                 {'exchange': 'twitter'}
+            ]},
+            {'name': 'syncacl', 'spec': 'syncacl', 'bindings': [
+                {'exchange': 'syncacl'}
             ]},
             {'name': 'tweety_restart', 'spec': 'tweety_restart'},
             {'name': 'twitter', 'spec': 'twitter'},

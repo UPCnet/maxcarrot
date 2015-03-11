@@ -11,11 +11,6 @@ import re
 SPECIFICATION = json.loads(open(pkg_resources.resource_filename(__name__, 'specification.json')).read())
 _SPECIFICATION = {}
 
-
-class MaxCarrotParsingError(Exception):
-    """
-    """
-
 for k, v in SPECIFICATION.items():
     spec_id = v['id']
     spec_value = {
@@ -31,6 +26,11 @@ for k, v in SPECIFICATION.items():
         spec_value['fields'][vv['id']] = {'name': kk}
 
     _SPECIFICATION[v['id']] = spec_value
+
+
+class MaxCarrotParsingError(Exception):
+    """
+    """
 
 
 class RabbitMessage(dict):

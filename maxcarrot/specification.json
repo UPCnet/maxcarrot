@@ -52,6 +52,9 @@
             },
             "activity": {
                 "id": "a"
+            },
+            "context": {
+                "id": "x"
             }
         }
     },
@@ -80,8 +83,10 @@
             },
             "maxbunny": {
                 "id": "b"
+            },
+            "hub": {
+                "id": "h"
             }
-
         }
     },
     "domain": {
