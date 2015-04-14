@@ -1,11 +1,14 @@
 Changelog
 =========
 
-4.0.10 (unreleased)
--------------------
+5.0 (2015-04-14)
+----------------
 
-- Nothing changed yet.
-
+* Upgrade specification [Carles Bruguera]
+* Normalize string to avoid json decoding errors [Carles Bruguera]
+* Raise exception on json decoding errors [Carles Bruguera]
+* Fix ipv6 host parsing [Carles Bruguera]
+* Command to force close a connection [Carles Bruguera]
 
 4.0.9 (2014-12-01)
 ------------------
