@@ -6,6 +6,7 @@ from maxcarrot.management import RabbitManagement
 import json
 import pkg_resources
 import re
+import gevent
 
 
 class RabbitClient(object):
@@ -55,10 +56,10 @@ class RabbitClient(object):
         ]
     }
 
-    def __init__(self, url, declare=False, user=None, client_properties={}):
+    def __init__(self, url, declare=False, user=None, client_properties={}, transport='socket'):
         self.__client_properties__.update(client_properties)
+        self.transport = transport
         self.connect(url)
-
         if declare:
             self.declare()
 
@@ -89,9 +90,25 @@ class RabbitClient(object):
 
         self.connection = RabbitConnection(
             user=self.user, password=self.password,
-            vhost=self.vhost, host=self.host,
+            vhost=self.vhost, host=self.host, transport=self.transport,
             heartbeat=None, debug=True, client_properties=self.__client_properties__)
+
+        if self.transport == 'gevent':
+            self._message_pump_greenlet = gevent.spawn(self._message_pump_greenthread)
+
         self.ch = self.connection.channel()
+
+    def _message_pump_greenthread(self):
+        try:
+            while self._conn is not None:
+                # Pump
+                self._conn.read_frames()
+
+                # Yield to other greenlets so they don't starve
+                gevent.sleep()
+        finally:
+            print "Leaving Message Pump"
+        return
 
     def disconnect(self):
         """
