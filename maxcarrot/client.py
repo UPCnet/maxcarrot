@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from haigha.connection import Connection as RabbitConnection
+from haigha.connections.rabbit_connection import RabbitConnection
 from haigha.message import Message
 from maxcarrot.management import RabbitManagement
 
@@ -97,18 +97,20 @@ class RabbitClient(object):
         self.user, self.password, self.host, self.port, self.vhost_url = parts
         self.vhost = self.vhost_url.replace('%2F', '/')
 
-        self.connection = RabbitConnection(
+        params = dict(
             user=self.user, password=self.password,
-            vhost=self.vhost, host=self.host, transport=self.transport,
-            close_cb=self._connection_closed_cb,
+            vhost=self.vhost, host=self.host, transport=self.transport
         )
+        if self.transport == 'gevent':
+            params['close_cb'] = self._connection_closed_cb,
 
+        self.connection = RabbitConnection(**params)
+
+        self.ch = self.connection.channel()
         if self.transport == 'gevent':
             print 'START GREEN'
             self._message_pump_greenlet = gevent.spawn(self._message_pump_greenthread)
-
-        self.ch = self.connection.channel()
-        self.ch.add_close_listener(self._channel_closed_cb)
+            self.ch.add_close_listener(self._channel_closed_cb)
 
     def _message_pump_greenthread(self):
         try:
@@ -124,17 +126,11 @@ class RabbitClient(object):
         return
 
     def _channel_closed_cb(self, ch):
-        print "AMQP channel closed; close-info: %s" % (
-            self.ch.close_info,)
         self.ch = None
-
-        # Initiate graceful closing of the AMQP broker connection
         self.connection.close()
         return
 
     def _connection_closed_cb(self):
-        print "AMQP broker connection closed; close-info: %s" % (
-            self.connection.close_info,)
         self.connection = None
 
     def disconnect(self):
