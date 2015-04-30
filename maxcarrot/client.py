@@ -6,7 +6,11 @@ from maxcarrot.management import RabbitManagement
 import json
 import pkg_resources
 import re
-import gevent
+try:
+    import gevent
+    gevent_available = True
+except:
+    gevent_available = False
 
 
 class RabbitClient(object):
@@ -59,6 +63,11 @@ class RabbitClient(object):
     def __init__(self, url, declare=False, user=None, client_properties={}, transport='socket'):
         self.__client_properties__.update(client_properties)
         self.transport = transport
+
+        # Fallback to socket transport if gevent not available
+        if self.transport == 'gevent' and not gevent_available:
+            self.transport = 'socket'
+
         self.connect(url)
         if declare:
             self.declare()
