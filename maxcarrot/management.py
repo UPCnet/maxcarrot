@@ -91,7 +91,7 @@ class RabbitManagement(object):
                     durable_match = queue_definition.get('durable', True) == queue['durable']
                     if not autodelete_match or not durable_match:
                         if 'gen' in queue['name']:
-                            import ipdb;ipdb.set_trace()
+                            pass
                         print 'Deleting non maching queue "{name}"'.format(**queue)
                         self.delete_queue(queue['name'])
 
