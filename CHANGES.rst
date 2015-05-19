@@ -1,11 +1,12 @@
 Changelog
 =========
 
-5.1 (unreleased)
+5.1 (2015-05-19)
 ----------------
 
-- Nothing changed yet.
-
+* Make non-gevent mode work [Carles Bruguera]
+* Fallback to socket transport if gevent not available [Carles Bruguera]
+* Gevent support [Carles Bruguera]
 
 5.0 (2015-04-14)
 ----------------
