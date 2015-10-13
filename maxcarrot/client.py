@@ -108,13 +108,11 @@ class RabbitClient(object):
 
         self.ch = self.connection.channel()
         if self.transport == 'gevent':
-            print 'START GREEN'
             self._message_pump_greenlet = gevent.spawn(self._message_pump_greenthread)
             self.ch.add_close_listener(self._channel_closed_cb)
 
     def _message_pump_greenthread(self):
         try:
-            print 'Start pump'
             while self.connection is not None:
                 # Pump
                 self.connection.read_frames()
@@ -122,8 +120,7 @@ class RabbitClient(object):
                 # Yield to other greenlets so they don't starve
                 gevent.sleep()
         finally:
-            print "Leaving Message Pump"
-        return
+            return
 
     def _channel_closed_cb(self, ch):
         self.ch = None
