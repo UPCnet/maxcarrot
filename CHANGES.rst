@@ -1,11 +1,11 @@
 Changelog
 =========
 
-5.1.2 (unreleased)
+5.1.2 (2016-07-26)
 ------------------
 
-- Nothing changed yet.
-
+* Update specification [Carles Bruguera]
+* Remove prints [Carles Bruguera]
 
 5.1.1 (2015-05-20)
 ------------------
