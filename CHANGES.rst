@@ -1,11 +1,10 @@
 Changelog
 =========
 
-5.1.4 (unreleased)
+5.1.4 (2016-11-16)
 ------------------
 
-- Nothing changed yet.
-
+* Para que lleguen las notificaciones push de comentarios [Pilar Marinas]
 
 5.1.3 (2016-07-26)
 ------------------
