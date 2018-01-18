@@ -1,4 +1,5 @@
 from maxcarrot.tests import RabbitTests
+from time import sleep
 
 
 class FunctionalTests(RabbitTests):
@@ -18,6 +19,8 @@ class FunctionalTests(RabbitTests):
 
         sheldon.conversations.send('conversation1', 'Hello!')
         leonard.conversations.send('conversation1', 'Hello...')
+
+        sleep(0.3)  # give a minum time to mail to be sent
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
@@ -68,6 +71,8 @@ class FunctionalTests(RabbitTests):
 
         sheldon.conversations.send('conversation1', 'Hello!')
         leonard.conversations.send('conversation1', 'Hello...')
+
+        sleep(0.3)  # give a minum time to mail to be sent
 
         messages_to_sheldon = sheldon.get_all()
         messages_to_leonard = leonard.get_all()
