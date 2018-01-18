@@ -1,11 +1,11 @@
 Changelog
 =========
 
-5.1.5 (unreleased)
+5.1.5 (2018-01-18)
 ------------------
 
-- Nothing changed yet.
-
+* Merge remote-tracking branch 'origin/develop' [Pilar Marinas]
+* Añadir sleep para que funcionen los tests [Pilar Marinas]
 
 5.1.4 (2016-11-16)
 ------------------
