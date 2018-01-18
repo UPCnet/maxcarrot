@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '5.1.5'
+version = '5.1.6.dev0'
 
 requires = [
     'haigha',
